@@ -155,6 +155,7 @@ if [ $BOARD != "native-clang" ] && [ $BOARD != "native-gcc" ]; then
     export BOARD_TARGET=$BOARD_TRIPLE
     export COMPILER_CC=${CC}
     export COMPILER_CXX=${CXX}
+    export BOARD_NAME=$BOARD
 else
     # host testing
     ulimit -c unlimited
