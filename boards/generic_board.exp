@@ -1,0 +1,128 @@
+#set verbose 9
+
+set compiler_type $::env(COMPILER_TYPE)
+puts "Generic board configuration compiler_type : $compiler_type"
+
+set dwarf_version "-gdwarf-4"
+set opt_warn ""
+
+if [string match ${compiler_type} "gcc"] {
+	set cc "gcc"
+	set cxx "g++"
+} else {
+	# for clang disable all warnings
+	set opt_warn "-w"
+	set cc "clang"
+	set cxx "clang++"
+}
+
+set c_compiler   $::env(COMPILER_CC)
+set cpp_compiler $::env(COMPILER_CXX)
+set gdb          $::env(BOARD_GDB)
+
+if {$::env(BOARD_TARGET) != "native"} {
+	load_generic_config  "gdbserver"
+	set cross $::env(BOARD_TRIPLE)
+	set sroot $::env(SYSROOT_PATH)
+	set ld_flags $::env(LDFLAGS)
+
+	if { [info exists ::env(PRETTY_PRINTER)] } {
+		set pretty_printer $::env(PRETTY_PRINTER)
+		set_board_info gdb_init_commands [list "set sysroot ${sroot}" "source ${pretty_printer}"]
+	} else {
+		set_board_info gdb_init_command "set sysroot ${sroot}"
+	}
+
+	# CFLAGS setting
+	set_board_info cflags "--sysroot=${sroot} ${opt_warn}"
+	set_board_info cxxflags "--sysroot=${sroot} ${opt_warn}"
+
+	# LDFLAGS setting
+	set_board_info ldflags "--sysroot=${sroot} ${ld_flags}"
+
+	set GDB            "${gdb}"
+	set AS             "${cross}-as"
+	set LD             "${cross}-ld"
+	set NM             "${cross}-nm"
+	set OBJDUMP        "${cross}-objdump"
+	set OBJCOPY        "${cross}-objcopy"
+	set READELF        "${cross}-readelf"
+	set STRIP          "${cross}-strip"
+	set GCC            "${c_compiler}"
+	set GXX            "${cpp_compiler}"
+
+	set_board_info gdb_protocol "remote"
+	set_board_info use_gdb_stub 1
+
+	set_board_info gdb,do_reload_on_run 1
+	set target_triplet ${cross}
+	set target_alias ${cross}
+	set HOSTNAME $::env(BOARD)
+
+    # To avoid WARNING: program timed out
+	set_board_info gdb,timeout 30
+	set_board_info timeout 30
+	set timeout 30
+	set test_timeout 30
+    set gdb_test_timeout 30
+    
+	set tks [split $HOSTNAME "@"]
+	set tks_len [llength $tks]
+	if { $tks_len == 2 } {
+	       set HOSTNAME_WITHOUT_USER [lindex $tks 1]
+	} else {
+	       set HOSTNAME_WITHOUT_USER ${HOSTNAME}
+	}
+	puts "HOSTNAME_WITHOUT_USER: ${HOSTNAME_WITHOUT_USER}"
+	set dog 1
+	set_board_info gdb_server_watchdog $dog
+	set_board_info sockethost "$HOSTNAME_WITHOUT_USER:"
+	set_board_info gdb_server_prog "$::env(DEEBE_PATH)"
+	set_board_info shell_prompt ".*% "
+	set_board_info connect  "rsh"
+	set_board_info rsh_prog "ssh"
+	set_board_info rcp_prog "scp"
+	set_board_info hostname ${HOSTNAME_WITHOUT_USER}
+	set_board_info noargs 1
+	set_board_info gdb,skip_known_failures 1
+	set_board_info gdb,can_reverse 0
+    #set_board_info gdb,skip_huge_test 1
+} else {
+	set ld_comp $::env(BOARD_LD)
+	set GDB            "${gdb}"
+	set AS             "as"
+	set LD             "${ld_comp}"
+	set NM             "nm"
+	set OBJDUMP        "objdump"
+	set OBJCOPY        "objcopy"
+	set READELF        "readelf"
+	set STRIP          "strip"
+	set GCC            "${c_compiler}"
+	set GXX            "${cpp_compiler}"
+
+	## CFLAGS setting
+	set_board_info cflags "${opt_warn}"
+	set_board_info cxxflags "${opt_warn}"
+
+	if { [info exists ::env(PRETTY_PRINTER)] } {
+		set pretty_printer $::env(PRETTY_PRINTER)
+		set_board_info gdb_init_command "source ${pretty_printer}"
+	}
+	
+	## LDFLAGS setting
+	set_board_info ldflags ""
+
+	# To avoid WARNING: program timed out
+	set_board_info gcc,timeout 5
+	set_board_info gdb,timeout 5
+	set_board_info timeout 5
+	set timeout 5
+	set_board_info protocol standard
+}
+
+set_board_info compiler    "${c_compiler}"
+set_board_info c++compiler "${cpp_compiler}"
+
+
+
+
