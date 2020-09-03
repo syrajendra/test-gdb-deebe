@@ -56,15 +56,15 @@ fi
 echo "Gdb version : $GDB_VERSION"
 
 GDB_MAJOR_VER=`echo $GDB_VERSION | tr "." " " | awk '{print $1}' | xargs`
-if [ "$GDB_MAJOR_VER" = "8" ] || [ "$GDB_MAJOR_VER" = "9" ]; then
+if [ "$GDB_MAJOR_VER" = "7" ]; then
+    GDB_CONFIG_LINE=`$GDB_EXE -v | grep "This GDB was configured as"`
+else
     GDB_CONFIG_LINE=`$GDB_EXE --configuration | grep "configure "`
     mhost=`echo $GDB_CONFIG_LINE | awk '{print $2}' | sed s/.*=//g | xargs`
     mtarget=`echo $GDB_CONFIG_LINE | awk '{print $3}' | sed s/.*=//g | xargs`
     if [ $mhost = $mtarget ]; then
         GDB_CONFIG_LINE="configure --host=$mhost"
     fi
-else
-    GDB_CONFIG_LINE=`$GDB_EXE -v | grep "This GDB was configured as"`
 fi
 
 # verify pretty printer path
