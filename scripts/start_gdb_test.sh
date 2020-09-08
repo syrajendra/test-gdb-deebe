@@ -23,7 +23,7 @@ export SYSROOT=${SYSROOT:-$TOP/sysroot}
 
 if [ $# != 1 ] && [ $# != 2 ]; then
     echo "ERROR: Supply arguments"
-    echo "First argument <board-name>. Optional argument GDB <testcase-name>"
+    echo "Supply argument <board-name>/native-gcc/native-clang. Optional argument GDB <testcase>"
     exit 1
 else
     export BOARD=$1

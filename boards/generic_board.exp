@@ -3,15 +3,24 @@
 set compiler_type $::env(COMPILER_TYPE)
 puts "Generic board configuration compiler_type : $compiler_type"
 
-set dwarf_version "-gdwarf-4"
-set opt_warn ""
+set compile_flags ""
 
 if [string match ${compiler_type} "gcc"] {
 	set cc "gcc"
 	set cxx "g++"
+	set compile_flags ""
 } else {
+	#
+	set DEBUG_UNUSED "-fno-eliminate-unused-debug-types"
+	# turns off debug info optimizations
+	set DEBUG_INFO "-fstandalone-debug"
+	#Generate debug info for preprocessor macros
+	set DEBUG_MACRO "-fdebug-macro"
 	# for clang disable all warnings
-	set opt_warn "-w"
+	set WARN "-w"
+	# clang-10 passing -dwarf-version=2 for fbsd-11
+	set dwarf_version "-gdwarf-4"
+	set compile_flags "$WARN $DEBUG_INFO $DEBUG_MACRO $DEBUG_UNUSED $dwarf_version"
 	set cc "clang"
 	set cxx "clang++"
 }
@@ -34,8 +43,8 @@ if {$::env(BOARD_TARGET) != "native"} {
 	}
 
 	# CFLAGS setting
-	set_board_info cflags "--sysroot=${sroot} ${opt_warn}"
-	set_board_info cxxflags "--sysroot=${sroot} ${opt_warn}"
+	set_board_info cflags "--sysroot=${sroot} ${compile_flags}"
+	set_board_info cxxflags "--sysroot=${sroot} ${compile_flags}"
 
 	# LDFLAGS setting
 	set_board_info ldflags "--sysroot=${sroot} ${ld_flags}"
@@ -101,8 +110,8 @@ if {$::env(BOARD_TARGET) != "native"} {
 	set GXX            "${cpp_compiler}"
 
 	## CFLAGS setting
-	set_board_info cflags "${opt_warn}"
-	set_board_info cxxflags "${opt_warn}"
+	set_board_info cflags "${compile_flags}"
+	set_board_info cxxflags "${compile_flags}"
 
 	if { [info exists ::env(PRETTY_PRINTER)] } {
 		set pretty_printer $::env(PRETTY_PRINTER)
