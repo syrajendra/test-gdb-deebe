@@ -1,5 +1,13 @@
 #!/bin/sh
 
+OUTPUT=`cat /proc/sys/kernel/yama/ptrace_scope`
+if [ "$OUTPUT" != "0" ]; then
+    echo "Kernel disabled ptrace attach by default. Run below commands"
+    echo "sudo su -"
+    echo "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+    exit 1
+fi
+
 # Due to kernel hardening in Linux ptrace attach is disabled by default
 # Before running any GDB tests run below command on Ubuntu
 # sudo su -

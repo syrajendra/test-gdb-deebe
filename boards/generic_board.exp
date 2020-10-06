@@ -20,7 +20,7 @@ if [string match ${compiler_type} "gcc"] {
 	set WARN "-w"
 	# clang-10 passing -dwarf-version=2 for fbsd-11
 	set dwarf_version "-gdwarf-4"
-	set compile_flags "$WARN $DEBUG_INFO $DEBUG_MACRO $DEBUG_UNUSED $dwarf_version"
+	set compile_flags "$WARN $DEBUG_INFO $DEBUG_UNUSED"
 	set cc "clang"
 	set cxx "clang++"
 }
@@ -95,7 +95,7 @@ if {$::env(BOARD_TARGET) != "native"} {
 	set_board_info noargs 1
 	set_board_info gdb,skip_known_failures 1
 	set_board_info gdb,can_reverse 0
-    #set_board_info gdb,skip_huge_test 1
+        #set_board_info gdb,skip_huge_test 1
 } else {
 	set ld_comp $::env(BOARD_LD)
 	set GDB            "${gdb}"
