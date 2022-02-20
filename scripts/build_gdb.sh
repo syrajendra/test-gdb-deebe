@@ -259,6 +259,15 @@ for arch in $archs; do
         objbase=$top/gdb-build${debug_dir}/${BUILT_WITH}/$OS/$OS_ID/$MACHINE/$custom_target
     fi
 
+    if test x$target != x; then
+        case $target in
+            *linux*) target_os=Linux;;
+            *freebsd*) target_os=FreeBSD;;
+            *) echo "Failed to detect target"; exit 1;;
+        esac
+        make_flags="$make_flags CFLAGS='-DTARGET_OS=$target_os' CXXFLAGS='-DTARGET_OS=$target_os'"
+    fi
+
     if [ x$arch != xppc-fbsd ] && [ x$arch != xpowerpc-fbsd ]; then
         echo "+-----------------------------------------------+"
         echo "| Building ${exeprefix}gdb |"
@@ -290,7 +299,7 @@ for arch in $archs; do
             ${gserver_flag}
             "
             echo "gdb configured with ..."
-            echo $cfg
+            echo $make_flags ${gdbdir}/configure $cfg
             eval $make_flags \
             ${gdbdir}/configure \
             $cfg \
