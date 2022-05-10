@@ -21,7 +21,7 @@ fi
 
 HOST_TRIPLE=`clang -dumpmachine`
 GDB_REPO="https://github.com/syrajendra/binutils-gdb.git"
-GDB_BRANCH="gdb-9.2-branch"
+GDB_BRANCH="gdb-12-branch"
 PRETTY_PRINTER_REPO="https://github.com/syrajendra/libcxx-pretty-printers.git"
 GDB_PUBLISH_DATE=`date "+%Y%m%d"`
 
@@ -42,6 +42,8 @@ i486-linux
 i386-linux
 arm64-linux
 armhf-linux
+riscv64-linux
+riscv32-linux
 "
 
 RUN_NATIVE_TESTS=0      # when set gdb tests are executed for native gdb
@@ -223,6 +225,18 @@ for arch in $archs; do
                 ;;
             armhf-linux)
                 target=arm-unknown-linux-gnueabihf
+                install_target=$target
+                exeprefix="$target-"
+                gdb_config_flags=""
+                ;;
+            riscv64-linux)
+                target=riscv64-unknown-linux-gnu
+                install_target=$target
+                exeprefix="$target-"
+                gdb_config_flags=""
+                ;;
+            riscv32-linux)
+                target=riscv32-unknown-linux-gnu
                 install_target=$target
                 exeprefix="$target-"
                 gdb_config_flags=""
