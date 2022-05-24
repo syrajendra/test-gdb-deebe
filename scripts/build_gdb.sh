@@ -47,7 +47,7 @@ riscv32-linux
 "
 
 RUN_NATIVE_TESTS=0      # when set gdb tests are executed for native gdb
-DEBUGGABLE=1            # when set gdb is built with debug info
+DEBUGGABLE=0            # when set gdb is built with debug info
 
 export CC=`which gcc`
 export CXX=`which g++`
@@ -107,9 +107,36 @@ gdbdir=$top/binutils-gdb
 
 gserver_flag=""
 
+export PYTHON_HOME=/usr/lib/x86_64-linux-gnu
+PYTHON_LIB=python3.8
+PLIB_PATH="$PYTHON_HOME/lib${PYTHON_LIB}.so"
+if [ ! -f  $PLIB_PATH ]; then
+  PYTHON_LIB=python3.10
+  PLIB_PATH="$PYTHON_HOME/lib${PYTHON_LIB}.so"
+  if [ ! -f  $PLIB_PATH ]; then
+    echo "Error: Failed to find libpython3 library"
+    exit 1
+  fi
+fi
+
 if [ $DEBUGGABLE = 1 ]; then
-    make_flags="$make_flags CFLAGS='-O0 -g' CXXFLAGS='-O0 -g'"
     debug_dir="-debug"
+fi
+
+local_install=$top/gdb-install${debug_dir}/${BUILT_WITH}/$OS/$OS_ID/$MACHINE
+prefix=${local_install}/gdb/${GDB_PUBLISH_DATE}
+
+mkdir -p $prefix/lib
+ln -sf $PLIB_PATH $prefix/lib/libpython3.so
+
+CFLAGS=""
+CXXFLAGS=""
+LDFLAGS="-L$prefix/lib -lpython3 -Wl,-rpath,$prefix/lib"
+
+if [ $DEBUGGABLE = 1 ]; then
+    make_flags="$make_flags CFLAGS='-O0 -g $CFLAGS' CXXFLAGS='-O0 -g $CXXFLAGS' LDFLAGS='$LDFLAGS'"
+else
+    make_flags="$make_flags CFLAGS='-O2 $CFLAGS' CXXFLAGS='-O2 $CXXFLAGS' LDFLAGS='$LDFLAGS'"
 fi
 
 for arch in $archs; do
@@ -288,8 +315,6 @@ for arch in $archs; do
         echo "+-----------------------------------------------+"
 
         
-        local_install=$top/gdb-install${debug_dir}/${BUILT_WITH}/$OS/$OS_ID/$MACHINE
-        prefix=${local_install}/gdb/${GDB_PUBLISH_DATE}
         
         mkdir -p ${objbase}
         cd ${objbase}
@@ -336,9 +361,6 @@ for arch in $archs; do
             echo "Error while building gdb"
             exit 1
         fi
-
-        # Remove unnecessary stuff
-        rm -rf ${prefix}/include ${prefix}/lib
 
         # for baseline builds generate test results as well
         if [ $RUN_NATIVE_TESTS = 1 ] && [ $arch = "native" ]; then
