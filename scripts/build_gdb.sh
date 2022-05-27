@@ -131,7 +131,7 @@ ln -sf $PLIB_PATH $prefix/lib/libpython3.so
 
 CFLAGS=""
 CXXFLAGS=""
-LDFLAGS="-L$prefix/lib -lpython3 -Wl,-rpath,$prefix/lib"
+LDFLAGS="-L$prefix/lib  -lpython3 -Wl,-rpath,$prefix/lib -lipt"
 
 if [ $DEBUGGABLE = 1 ]; then
     make_flags="$make_flags CFLAGS='-O0 -g $CFLAGS' CXXFLAGS='-O0 -g $CXXFLAGS' LDFLAGS='$LDFLAGS'"
@@ -346,7 +346,10 @@ for arch in $archs; do
         fi
 
         if [ ! -e .compiled ]; then
-            $MAKE V=1 -j$PARALLELISM all-gdb all-sim 2>&1 | tee  build-gdb.log && touch .compiled
+            $MAKE V=1 -j$PARALLELISM all-gdb all-sim 2>&1 | tee  build-gdb.log
+            if [ $? = 0 ]; then
+              touch .compiled
+            fi
         else
             echo "Compiled  @ $PWD"
         fi
