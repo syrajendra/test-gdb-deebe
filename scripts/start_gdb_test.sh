@@ -1,11 +1,14 @@
 #!/bin/sh
+OS=`uname -s`
 
+if [ $OS = "Linux" ]; then
 OUTPUT=`cat /proc/sys/kernel/yama/ptrace_scope`
-if [ "$OUTPUT" != "0" ]; then
-    echo "Kernel disabled ptrace attach by default. Run below commands"
-    echo "sudo su -"
-    echo "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
-    exit 1
+    if [ "$OUTPUT" != "0" ]; then
+        echo "Kernel disabled ptrace attach by default. Run below commands"
+        echo "sudo su -"
+        echo "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+        exit 1
+    fi
 fi
 
 # Due to kernel hardening in Linux ptrace attach is disabled by default
