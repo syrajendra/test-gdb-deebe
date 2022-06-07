@@ -107,7 +107,12 @@ gdbdir=$top/binutils-gdb
 
 gserver_flag=""
 
+if [ "$OS" = "Linux" ]; then
 export PYTHON_HOME=/usr/lib/x86_64-linux-gnu
+else
+export PYTHON_HOME=/usr/local/lib
+DISABLE_XXHASH="--with-xxhash=no"
+fi
 PYTHON_LIB=python3.8
 PLIB_PATH="$PYTHON_HOME/lib${PYTHON_LIB}.so"
 if [ ! -f  $PLIB_PATH ]; then
@@ -131,7 +136,10 @@ ln -sf $PLIB_PATH $prefix/lib/libpython3.so
 
 CFLAGS=""
 CXXFLAGS=""
-LDFLAGS="-L$prefix/lib  -lpython3 -Wl,-rpath,$prefix/lib -lipt"
+if [ "$OS" = "Linux" ]; then
+IPTDL="-lipt"
+fi
+LDFLAGS="-L$prefix/lib  -lpython3 -Wl,-rpath,$prefix/lib $IPTDL -lpthread"
 
 if [ $DEBUGGABLE = 1 ]; then
     make_flags="$make_flags CFLAGS='-O0 -g $CFLAGS' CXXFLAGS='-O0 -g $CXXFLAGS' LDFLAGS='$LDFLAGS'"
@@ -334,6 +342,7 @@ for arch in $archs; do
             --enable-sim
             --with-x=no
             --with-lzma=no
+	    ${DISABLE_XXHASH}
             ${gdb_config_flags}
             ${gserver_flag}
             "
