@@ -1,4 +1,8 @@
 #!/bin/sh
+#-----------------------------------------#
+# Copyright (c) 2020-2023 by Rajendra S Y #
+# All rights reserved.                    #
+#-----------------------------------------#
 
 # remote machine
 RMACHINE=$1

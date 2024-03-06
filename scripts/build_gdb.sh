@@ -1,4 +1,8 @@
 #!/bin/sh
+#-----------------------------------------#
+# Copyright (c) 2020-2023 by Rajendra S Y #
+# All rights reserved.                    #
+#-----------------------------------------#
 
 OS=`uname -s`
 MACHINE=`uname -m`
@@ -21,7 +25,7 @@ fi
 
 HOST_TRIPLE=`clang -dumpmachine`
 GDB_REPO="https://github.com/syrajendra/binutils-gdb.git"
-GDB_BRANCH="gdb-12-branch"
+GDB_BRANCH="jnpr-gdb-14.1-branch"
 PRETTY_PRINTER_REPO="https://github.com/syrajendra/libcxx-pretty-printers.git"
 GDB_PUBLISH_DATE=`date "+%Y%m%d"`
 
@@ -47,7 +51,7 @@ riscv32-linux
 "
 
 RUN_NATIVE_TESTS=0      # when set gdb tests are executed for native gdb
-DEBUGGABLE=0            # when set gdb is built with debug info
+DEBUGGABLE=1            # when set gdb is built with debug info
 
 export CC=`which gcc`
 export CXX=`which g++`
@@ -108,16 +112,16 @@ gdbdir=$top/binutils-gdb
 gserver_flag=""
 
 if [ "$OS" = "Linux" ]; then
-export PYTHON_HOME=/usr/lib/x86_64-linux-gnu
+export PYTHON_HOME=/volume/hab/$OS/$OS_ID/$MACHINE/python/3.12.2/current
 else
-export PYTHON_HOME=/usr/local/lib
+export PYTHON_HOME=/usr/local
 DISABLE_XXHASH="--with-xxhash=no"
 fi
-PYTHON_LIB=python3.8
-PLIB_PATH="$PYTHON_HOME/lib${PYTHON_LIB}.so"
+PYTHON_LIB=python3.12
+PLIB_PATH="$PYTHON_HOME/lib/lib${PYTHON_LIB}.so"
 if [ ! -f  $PLIB_PATH ]; then
   PYTHON_LIB=python3.10
-  PLIB_PATH="$PYTHON_HOME/lib${PYTHON_LIB}.so"
+  PLIB_PATH="$PYTHON_HOME/lib/lib${PYTHON_LIB}.so"
   if [ ! -f  $PLIB_PATH ]; then
     echo "Error: Failed to find libpython3 library"
     exit 1
