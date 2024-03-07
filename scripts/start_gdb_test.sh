@@ -29,12 +29,14 @@ MACHINE=`uname -m`
 export GDB_SRC=${GDB_SRC:-$TOP/binutils-gdb}
 # default gdb binary
 export GDB_EXE=${GDB_EXE:-/usr/bin/gdb}
+#export GDB_EXE=/home/syrajendra/Rajendra/gdb-14.1/gdb-install-debug/gcc-11.4.0/Linux/Ubuntu-22.04/x86_64/gdb/20240307/bin/aarch64-unknown-freebsd-gdb
+
 # default pretty printer
-export PRETTY_PRINTER=${PRETTY_PRINTER:-$TOP/libcxx-pretty-printers/src/gdbinit}
+export PRETTY_PRINTER=${PRETTY_PRINTER:-/volume/hab/sysroot/libcxx-pretty-printers/src/gdbinit}
 # default deebe path on remote machine
 export DEEBE_PATH="/usr/local/bin/deebe"
 # default sysroot
-export SYSROOT=${SYSROOT:-$TOP/sysroot}
+export SYSROOT=${SYSROOT:-/volume/hab/sysroot}
 
 if [ $# != 1 ] && [ $# != 2 ]; then
     echo "ERROR: Supply arguments"
@@ -113,8 +115,9 @@ if [ $BOARD != "native-clang" ] && [ $BOARD != "native-gcc" ]; then
         exit 1
     fi
     echo "Board os : $BOARD_OS"
-
-    export BOARD_TRIPLE=`ssh $BOARD ${BOARD_CC} -dumpmachine`
+    
+    ssh $BOARD ${BOARD_CC} -dumpmachine > /tmp/arch.txt
+    export BOARD_TRIPLE=`cat /tmp/arch.txt`
     echo "Board triple : $BOARD_TRIPLE"
 
     if [ ! -d $SYSROOT/$BOARD_TRIPLE ]; then
@@ -128,7 +131,7 @@ if [ $BOARD != "native-clang" ] && [ $BOARD != "native-gcc" ]; then
     echo "Board architecture : $BOARD_ARCH"
     
     if echo $GDB_CONFIG_LINE | grep -q 'target='; then # cross gdb testing
-        if [ "$GDB_MAJOR_VER" = "8" ] || [ "$GDB_MAJOR_VER" = "9" ]; then
+        if [ "$GDB_MAJOR_VER" = "8" ] || [ "$GDB_MAJOR_VER" = "14" ]; then
             GDB_TARGET=`echo $GDB_CONFIG_LINE | awk '{print $3}' | sed s/--target=//g`
         else
             GDB_TARGET=`echo $GDB_CONFIG_LINE | awk '{print $7}' | sed s/\"\.//g | sed s/--target=//g`
